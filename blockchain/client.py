@@ -16,6 +16,10 @@ node_network = set()
 
 
 def get_node_network():
+    """Attempts to retrieve the node network from a list of known nodes
+
+    In case the only node on the list is itself, no nodes get added.
+    """
     current_node_address = f"{config['SERVER']['Host']}:{config['SERVER']['Port']}"
     for node_address in FALLBACK_NODES_ADDRESSES:
 
@@ -64,6 +68,11 @@ def get_blockchain():
 
 
 def init_client():
+    """Initializes the client interface towards other nodes.
+
+    - Attempts discovering nodes by requesting them from known nodes
+    - Attempts retrieving the blockchain from the discovered nodes
+    """
     get_node_network()
 
     if len(node_network) > 0:
