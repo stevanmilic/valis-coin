@@ -4,6 +4,7 @@ from apistar import Route, http
 
 from blockchain.model_types import Transaction, Block, Node, BlockInfo
 from blockchain.client import tail_block, txns_pool, node_network
+from blockchain.miner import miner
 
 
 def validate_transaction(transaction: Transaction) -> bool:
@@ -37,7 +38,7 @@ def push_transaction(transaction: Transaction) -> http.JSONResponse:
     txns_pool.append(transaction)
     if len(txns_pool) == 100:
         pass
-        # miner.process_transaction_pool(txns_pool, tail_block)
+        miner.process_transaction_pool(txns_pool, tail_block)
 
     return http.JSONResponse({'status': 'Success'}, status_code=200)
 

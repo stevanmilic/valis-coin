@@ -111,6 +111,8 @@ class Miner(threading.Thread):
         self.mining.set()
 
 
+miner = Miner()
+
+
 def start_miner():
-    miner = Miner()
     miner.start()
