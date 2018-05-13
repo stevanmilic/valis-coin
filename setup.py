@@ -10,4 +10,7 @@ setup(
             'debug-valis-node = blockchain.__main__:debug'
         ]
     },
+    install_requires=[
+        'apistar',
+    ],
 )
