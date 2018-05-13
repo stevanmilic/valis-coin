@@ -6,8 +6,8 @@ setup(
     packages=['blockchain'],
     entry_points={
         'console_scripts': [
-            'blockchain = blockchain.__main__:main'
-            'debug-blockchain = blockchain.__main__:debug'
+            'valis-node = blockchain.__main__:main',
+            'debug-valis-node = blockchain.__main__:debug'
         ]
     },
 )
