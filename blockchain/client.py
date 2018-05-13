@@ -18,6 +18,10 @@ node_network = set()
 def get_node_network():
     current_node_address = f"{config['SERVER']['Host']}:{config['SERVER']['Port']}"
     for node_address in FALLBACK_NODES_ADDRESSES:
+
+        if node_address == current_node_address:
+            continue
+
         request = {
             'address': node_address,
         }
