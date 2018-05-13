@@ -1,7 +1,7 @@
 import shelve
 
 
-blocks = {}
+blocks = None
 
 
 def get_block(block_hash) -> 'Block':
