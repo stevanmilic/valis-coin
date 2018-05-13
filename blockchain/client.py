@@ -65,4 +65,6 @@ def get_blockchain():
 
 def init_client():
     get_node_network()
-    get_blockchain()
+
+    if len(node_network) > 0:
+        get_blockchain()
