@@ -1,0 +1,40 @@
+import sys
+import argparse
+from datetime import datetime
+
+from blockchain.miner import start_miner, Miner
+from blockchain.server import start_server
+from blockchain.client import init_client, config
+from blockchain.blocks import blocks
+from blockchain.model_types import Block
+
+
+def bootstrap_blockchain():
+    txns_to_process = [Miner.reward(config['WALLET']['Address'])]
+
+    nonce, mined_hash = Miner.mine(
+        'start_payload',
+        txns_to_process,
+        config['WALLET']['Address'],
+    )
+
+    block = Block(
+        height=0,
+        timestamp=datetime.now(),
+        txns=txns_to_process,
+        mined_hash=mined_hash,
+        previous_hash=None,
+        nonce=nonce,
+    )
+
+    blocks[block.mined_hash] = block
+
+
+def main(args=None):
+    init_client()
+    start_miner()
+    start_server()
+
+
+if __name__ == "__main__":
+    main()
