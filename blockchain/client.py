@@ -37,14 +37,10 @@ def get_node_network():
         )
 
 
-def blockchain_address(node):
-    return f'{node.address}/node/blockchain'
-
-
-def get_tail_block(node):
+def get_block_by_height(node, height):
     return Block(requests.get(
-        blockchain_address(node),
-        {'height': None},
+        f'{node.address}/node/blockchain',
+        {'height': height},
     ))
 
 
@@ -52,16 +48,16 @@ def get_blockchain():
     global tail_block
 
     node_network_list = list(node_network)
-    tail_block = get_tail_block(node_network_list[0])
+    tail_block = get_block_by_height(node_network_list[0], None)
 
     block = tail_block
     node_network_length = len(node_network_list)
     index = node_network_length - 1
     while block.previous_hash is not None:
-        block = Block(requests.get(
-            blockchain_address(node_network_list[index]),
-            {'height': tail_block.height - 1},
-        ))
+        get_block_by_height(
+            node_network_list[index],
+            tail_block.height,
+        )
         blocks[block.mined_hash] = block
 
         index = (index - 1) % node_network_length
