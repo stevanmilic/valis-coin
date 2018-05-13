@@ -1,3 +1,6 @@
+import shelve
+
+
 blocks = {}
 
 
@@ -8,3 +11,16 @@ def get_block(block_hash) -> 'Block':
         return None
 
     return blocks[block_hash]
+
+
+def load():
+    global blocks
+    blocks = shelve.open('blocks.dat', flag='c', writeback=True)
+
+
+def save():
+    blocks.sync()
+
+
+def close():
+    blocks.close()

@@ -5,7 +5,7 @@ from datetime import datetime
 from blockchain.miner import start_miner, Miner
 from blockchain.server import start_server
 from blockchain.client import init_client, config
-from blockchain.blocks import blocks
+from blockchain.blocks import blocks, load as load_blocks, close as close_blocks
 from blockchain.model_types import Block
 
 
@@ -31,9 +31,14 @@ def bootstrap_blockchain():
 
 
 def main(args=None):
+    load_blocks()
     init_client()
     start_miner()
-    start_server()
+    try:
+        start_server()
+    except KeyboardInterrupt:
+        pass
+    close_blocks()
 
 
 def debug():
