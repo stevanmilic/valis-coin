@@ -11,4 +11,4 @@ app = App(routes=routes)
 
 
 def start_server():
-    app.serve(config['SERVER']['Host'], int(config['SERVER']['Port']), debug=True)
+    app.serve(config['SERVER']['Host'], int(config['SERVER']['Port']), debug=False)
