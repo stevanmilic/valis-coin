@@ -1,21 +1,19 @@
-import sys
-import argparse
 from datetime import datetime
 
+from blockchain import blocks
+from blockchain import client
 from blockchain.miner import start_miner, Miner
 from blockchain.server import start_server
-from blockchain.client import init_client, config
-from blockchain.blocks import blocks, load as load_blocks, close as close_blocks
 from blockchain.model_types import Block
 
 
 def bootstrap_blockchain():
-    txns_to_process = [Miner.reward(config['WALLET']['Address'])]
+    txns_to_process = [Miner.reward(client.config['WALLET']['Address'])]
 
     nonce, mined_hash = Miner.mine(
         'start_payload',
         txns_to_process,
-        config['WALLET']['Address'],
+        client.config['WALLET']['Address'],
     )
 
     block = Block(

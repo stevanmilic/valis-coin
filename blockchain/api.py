@@ -2,13 +2,13 @@ from typing import List
 
 from apistar import Route, http
 
-from blockchain.model_types import Transaction, Block, Node, BlockInfo
-from blockchain.client import tail_block, txns_pool, node_network
+from blockchain import client
 from blockchain.miner import miner
+from blockchain.model_types import Transaction, Block, Node, BlockInfo
 
 
 def validate_transaction(transaction: Transaction) -> bool:
-    block = tail_block
+    block = client.tail_block
 
     # this a sender transactions info
     output_amount = input_amount = 0
@@ -35,10 +35,10 @@ def push_transaction(transaction: Transaction) -> http.JSONResponse:
     if not validate_transaction(transaction):
         return http.JSONResponse({'status': 'Error'}, status_code=400)
 
-    txns_pool.append(transaction)
-    if len(txns_pool) == 100:
+    client.txns_pool.append(transaction)
+    if len(client.txns_pool) == 100:
         pass
-        miner.process_transaction_pool(txns_pool, tail_block)
+        miner.process_transaction_pool(client.txns_pool, client.tail_block)
 
     return http.JSONResponse({'status': 'Success'}, status_code=200)
 
@@ -48,12 +48,12 @@ def notify_mined_block(block: Block) -> http.JSONResponse:
 
 
 def get_node_network(node: Node) -> List[Node]:
-    node_network.add(node.address)
-    return node_network
+    client.node_network.add(node.address)
+    return list(client.node_network)
 
 
 def get_block(block_info: BlockInfo) -> Block:
-    block = tail_block
+    block = client.tail_block
 
     if block_info.height is None:
         return block
