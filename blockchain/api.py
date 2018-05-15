@@ -37,7 +37,6 @@ def push_transaction(transaction: Transaction) -> http.JSONResponse:
 
     client.txns_pool.append(transaction)
     if len(client.txns_pool) == 100:
-        pass
         miner.process_transaction_pool(client.txns_pool, client.tail_block)
 
     return http.JSONResponse({'status': 'Success'}, status_code=200)
@@ -54,9 +53,6 @@ def get_node_network(node: Node) -> List[Node]:
 
 def get_block(block_info: BlockInfo) -> Block:
     block = client.tail_block
-
-    if block_info.height is None:
-        return block
 
     while block is not None:
         if block.height == block_info.height:

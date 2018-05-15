@@ -38,4 +38,4 @@ class Node(PickleType):
 
 
 class BlockInfo(PickleType):
-    height = validators.Integer(allow_null=True)
+    height = validators.Integer()
