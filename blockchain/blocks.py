@@ -1,7 +1,7 @@
 import shelve
 
 
-blocks = None
+blocks = {}
 
 
 def get_block(block_hash) -> 'Block':
@@ -16,6 +16,7 @@ def get_block(block_hash) -> 'Block':
 def load():
     global blocks
     blocks = shelve.open('blocks.dat', flag='c', writeback=True)
+    return blocks
 
 
 def save():

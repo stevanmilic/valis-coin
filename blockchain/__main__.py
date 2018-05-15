@@ -25,18 +25,22 @@ def bootstrap_blockchain():
         nonce=nonce,
     )
 
-    blocks[block.mined_hash] = block
+    blocks.load()
+    blocks.blocks[block.mined_hash] = block
+    blocks.save()
 
 
 def main(args=None):
-    load_blocks()
-    init_client()
+    blocks.load()
+    client.init_client()
+    # TODO: get the first relevant block please
+    client.tail_block = next(iter(list(blocks.blocks.values())))
     start_miner()
     try:
         start_server()
     except KeyboardInterrupt:
         pass
-    close_blocks()
+    blocks.close()
 
 
 def debug():

@@ -32,16 +32,17 @@ def get_node_network():
         nodes = requests.get(f'http://{node_address}/node/node_network/', params=request)
 
         node_network.add(
-            [Node(node) for node in nodes
-             if node.address != current_node_address]
+            [Node(node) for node in nodes.json()
+             if node != current_node_address]
         )
 
 
 def get_block_by_height(node, height):
-    return Block(requests.get(
+    response = requests.get(
         f'{node.address}/node/blockchain',
         {'height': height},
-    ))
+    )
+    return Block(response.data())
 
 
 def get_blockchain():
