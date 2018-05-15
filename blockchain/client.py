@@ -20,6 +20,8 @@ def get_node_network():
 
     In case the only node on the list is itself, no nodes get added.
     """
+    global node_network
+
     current_node_address = f"{config['SERVER']['Host']}:{config['SERVER']['Port']}"
     for node_address in FALLBACK_NODES_ADDRESSES:
 
@@ -29,11 +31,11 @@ def get_node_network():
         request = {
             'address': node_address,
         }
-        nodes = requests.get(f'http://{node_address}/node/node_network/', params=request)
+        response = requests.get(f'http://{node_address}/node/node_network', data=request)
 
-        node_network.add(
-            [Node(node) for node in nodes.json()
-             if node != current_node_address]
+        node_network = node_network.union(
+            set(node for node in response.json()
+             if node != current_node_address)
         )
 
 
