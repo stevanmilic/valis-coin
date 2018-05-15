@@ -2,8 +2,8 @@ from configparser import ConfigParser
 
 import requests
 
-from blockchain.blocks import blocks
-from blockchain.model_types import Node, Block
+from blockchain import blocks
+from blockchain.model_types import Block
 
 config = ConfigParser()
 config.read('config.ini')
@@ -61,7 +61,7 @@ def get_blockchain():
             node_network_list[index],
             tail_block.height,
         )
-        blocks[block.mined_hash] = block
+        blocks.blocks[block.mined_hash] = block
 
         index = (index - 1) % node_network_length
 
@@ -74,5 +74,5 @@ def init_client():
     """
     get_node_network()
 
-    if len(node_network) > 0:
+    if node_network:
         get_blockchain()

@@ -8,7 +8,7 @@ from blockchain.model_types import Block
 
 
 def bootstrap_blockchain():
-    txns_to_process = [Miner.reward(client.config['WALLET']['Address'])]
+    txns_to_process = []
 
     nonce, mined_hash = Miner.mine(
         'start_payload',
