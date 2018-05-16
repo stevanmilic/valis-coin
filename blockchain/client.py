@@ -57,13 +57,16 @@ def get_blockchain():
     node_network_list = list(node_network)
     tail_block = get_block_by_height(node_network_list[0], None)
 
+    if tail_block is None:
+        return
+
     block = tail_block
     node_network_length = len(node_network_list)
     index = node_network_length - 1
     while block.previous_hash is not None:
-        get_block_by_height(
+        block = get_block_by_height(
             node_network_list[index],
-            tail_block.height,
+            tail_block.height - 1,
         )
         blocks.blocks[block.mined_hash] = block
 
