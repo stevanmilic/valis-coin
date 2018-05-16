@@ -83,28 +83,33 @@ class Miner(threading.Thread):
             nonce=nonce,
         )
 
-    def _publish_the_block(self, block):
-        # TODO: publish to all nodes and update current node's `tail_block`
-        raise NotImplementedError()
+    @classmethod
+    def publish_the_block(cls, mined_block):
+        client.tail_block = mined_block
+        # TODO: publish to all nodes
 
     def run(self):
-        while self.mining.is_set():
-            self.mining.wait()
-
+        while self.mining.wait():
             mined_block = self.mine_for_block(
                 self.mine_info['txns_pool'],
                 self.mine_info['tail_block'],
-                config['WALLET']['Address'],
+                client.config['WALLET']['Address'],
             )
+            self.mining.clear()
 
             # use seperate thread for this please
-            self._publish_the_block(mined_block)
+            self.publish_the_block(mined_block)
 
-    def process_transaction_pool(self,
-                                 txns_pool: List[Transaction],
-                                 tail_block: Block):
+    def process_txns_pool(self,
+                          txns_pool: List[Transaction],
+                          tail_block: Block):
+        # deeocopy of txns_pool
+        txns_pool_copy = []
+        for txn in txns_pool:
+            txns_pool_copy.append(Transaction(dict(txn)))
+
         self.mine_info = {
-            'txns_pool': deepcopy(txns_pool),
+            'txns_pool': txns_pool_copy,
             'tail_block': tail_block,
         }
         self.mining.set()
