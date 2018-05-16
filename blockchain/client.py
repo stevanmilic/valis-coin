@@ -32,11 +32,14 @@ def get_node_network():
         request = {
             'address': node_address,
         }
-        response = requests.get(f'http://{node_address}/node/node_network', data=request)
+        response = requests.get(
+            f'http://{node_address}/node/node_network',
+            data=request,
+        )
 
         node_network = node_network.union(
             set(node for node in response.json()
-             if node != current_node_address)
+                if node != current_node_address)
         )
 
 

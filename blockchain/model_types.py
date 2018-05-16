@@ -33,9 +33,7 @@ class Block(PickleType):
 
 class Node(PickleType):
     address = validators.String(max_length=100)
-    # last_seen = validators.DateTime()
-    # TBD^
 
 
 class BlockInfo(PickleType):
-    height = validators.Integer()
+    height = validators.Integer(allow_null=True)

@@ -55,11 +55,14 @@ def get_node_network(node: Node) -> List[Node]:
 
 
 def get_block(block_info: BlockInfo) -> Block:
-    block = client.tail_block
+    if block_info.height is None:
+        return client.tail_block
 
+    block = client.tail_block
     while block is not None:
         if block.height == block_info.height:
             return block
+        block = block.previous_block
 
     return None
 

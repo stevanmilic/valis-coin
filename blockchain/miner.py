@@ -2,9 +2,8 @@ import threading
 from typing import List
 from hashlib import sha256
 from datetime import datetime
-from copy import deepcopy
 
-from blockchain.client import config
+from blockchain import client
 from blockchain.model_types import Transaction, Block
 
 
