@@ -8,11 +8,12 @@ from blockchain.model_types import Block
 config = ConfigParser()
 config.read('config.ini')
 
-FALLBACK_NODES_ADDRESSES = ['127.0.0.1:5000']
-
 tail_block = None
 txns_pool = []
 node_network = set()
+
+TXNS_POOL_SIZE = 5
+FALLBACK_NODES_ADDRESSES = ['127.0.0.1:5000']
 
 
 def get_node_network():

@@ -8,13 +8,15 @@ from blockchain.model_types import Transaction, Block, Node, BlockInfo
 
 
 def validate_transaction(transaction: Transaction) -> bool:
+    # TODO: implement a smarter way of validating transactions e.g. UTXO
+    #       since this approach won't work (the pool is cleared)
     block = client.tail_block
 
     # this a sender transactions info
     output_amount = input_amount = 0
 
     while block is not None:
-        for valid_transaction in block.transactions:
+        for valid_transaction in block.txns:
             if valid_transaction.receiver == transaction.sender:
                 input_amount += valid_transaction.amount
             elif valid_transaction.sender == transaction.sender:
@@ -23,7 +25,7 @@ def validate_transaction(transaction: Transaction) -> bool:
         block = block.previous_block
 
     # how much amount(money) sender has
-    net_amount = output_amount - input_amount
+    net_amount = input_amount - output_amount
 
     if transaction.amount <= net_amount:
         return True
@@ -36,8 +38,9 @@ def push_transaction(transaction: Transaction) -> http.JSONResponse:
         return http.JSONResponse({'status': 'Error'}, status_code=400)
 
     client.txns_pool.append(transaction)
-    if len(client.txns_pool) == 100:
-        miner.process_transaction_pool(client.txns_pool, client.tail_block)
+    if len(client.txns_pool) == client.TXNS_POOL_SIZE:
+        miner.process_txns_pool(client.txns_pool, client.tail_block)
+        client.txns_pool = []
 
     return http.JSONResponse({'status': 'Success'}, status_code=200)
 
