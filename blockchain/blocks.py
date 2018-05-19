@@ -1,7 +1,7 @@
 import shelve
 
-
 blocks = {}
+tail_block = None
 
 
 def get_block(block_hash) -> 'Block':
@@ -13,13 +13,19 @@ def get_block(block_hash) -> 'Block':
     return blocks[block_hash]
 
 
+def set_block(block_hash, block: 'Block'):
+    blocks[block_hash] = block
+
+
 def load():
-    global blocks
+    global blocks, tail_block
     blocks = shelve.open('blocks.dat', flag='c', writeback=True)
-    return blocks
+    if 'tail_block' in blocks.keys():
+        tail_block = blocks['tail_block']
 
 
 def save():
+    blocks['tail_block'] = tail_block
     blocks.sync()
 
 

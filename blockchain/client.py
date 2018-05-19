@@ -68,8 +68,7 @@ def get_blockchain():
             node_network_list[index],
             tail_block.height - 1,
         )
-        blocks.blocks[block.mined_hash] = block
-
+        blocks.set_block(block.mined_hash, block)
         index = (index - 1) % node_network_length
 
 

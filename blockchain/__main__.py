@@ -26,15 +26,15 @@ def bootstrap_blockchain():
     )
 
     blocks.load()
-    blocks.blocks[block.mined_hash] = block
+    blocks.set_block(block.mined_hash, block)
+    blocks.tail_block = block
     blocks.save()
+    blocks.close()
 
 
 def main(args=None):
     blocks.load()
     client.init_client()
-    # TODO: get the first relevant block please
-    client.tail_block = next(iter(list(blocks.blocks.values())))
     start_miner()
     try:
         start_server()
