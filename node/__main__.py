@@ -40,6 +40,7 @@ def main(args=None):
         start_server()
     except KeyboardInterrupt:
         pass
+    blockchain.save()
     blockchain.close()
 
 

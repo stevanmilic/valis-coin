@@ -45,29 +45,35 @@ def get_node_network():
 
 
 def get_block_by_height(node, height):
-    response = requests.get(
-        f'{node.address}/node/blockchain',
-        {'height': height},
-    )
-    return Block(response.data())
+    data = requests.get(
+        f'http://{node}/node/blockchain',
+        json={'height': height},
+    ).json()
+
+    if data is None:
+        return None
+
+    return Block(data)
 
 
 def get_blockchain():
     global tail_block
 
     node_network_list = list(node_network)
-    tail_block = get_block_by_height(node_network_list[0], None)
+    blockchain.tail_block = get_block_by_height(node_network_list[0], None)
 
-    if tail_block is None:
+    if blockchain.tail_block is None:
         return
 
-    block = tail_block
+    block = blockchain.tail_block
+    blockchain.set_block(block.mined_hash, block)
+
     node_network_length = len(node_network_list)
     index = node_network_length - 1
     while block.previous_hash is not None:
         block = get_block_by_height(
             node_network_list[index],
-            tail_block.height - 1,
+            block.height - 1,
         )
         blockchain.set_block(block.mined_hash, block)
         index = (index - 1) % node_network_length
@@ -75,11 +81,12 @@ def get_blockchain():
 
 def init_utxo():
     block = blockchain.tail_block
-    while block.previous_hash is not None:
-        for txn in block.txns_pool:
+    while block is not None:
+        for txn in block.txns:
             utxo[txn.receiver] += txn.amount
             if txn.sender:
                 utxo[txn.sender] -= txn.amount
+        block = block.previous_block
 
 
 def init_client():
@@ -87,9 +94,12 @@ def init_client():
 
     - Attempts discovering nodes by requesting them from known nodes
     - Attempts retrieving the blockchain from the discovered nodes
+    - Attempls initilization of utxo database used for validating transactions
     """
     get_node_network()
 
     if node_network:
         get_blockchain()
+
+    if blockchain.tail_block:
         init_utxo()

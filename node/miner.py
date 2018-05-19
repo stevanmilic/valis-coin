@@ -16,6 +16,8 @@ class Miner(threading.Thread):
         super().__init__()
         self.mine_info = None
         self.mining = threading.Event()
+        # TODO: use this lock ... concurrently
+        self.lock = threading.Lock()
 
     @staticmethod
     def calculate_reward() -> int:
@@ -85,7 +87,7 @@ class Miner(threading.Thread):
 
     @classmethod
     def publish_the_block(cls, mined_block):
-        client.tail_block = mined_block
+        client.blockchain.tail_block = mined_block
         # TODO: publish to all nodes
 
     def run(self):
@@ -119,4 +121,5 @@ miner = Miner()
 
 
 def start_miner():
+    miner.daemon = True
     miner.start()
