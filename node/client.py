@@ -3,8 +3,8 @@ from collections import defaultdict
 
 import requests
 
-from blockchain import blocks
-from blockchain.model_types import Block
+from node import blockchain
+from node.model_types import Block
 
 config = ConfigParser()
 config.read('config.ini')
@@ -69,12 +69,12 @@ def get_blockchain():
             node_network_list[index],
             tail_block.height - 1,
         )
-        blocks.set_block(block.mined_hash, block)
+        blockchain.set_block(block.mined_hash, block)
         index = (index - 1) % node_network_length
 
 
 def init_utxo():
-    block = blocks.tail_block
+    block = blockchain.tail_block
     while block.previous_hash is not None:
         for txn in block.txns_pool:
             utxo[txn.receiver] += txn.amount

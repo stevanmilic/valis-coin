@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from blockchain import blocks
-from blockchain import client
-from blockchain.miner import start_miner, Miner
-from blockchain.server import start_server
-from blockchain.model_types import Block
+from node import blockchain
+from node import client
+from node.miner import start_miner, Miner
+from node.server import start_server
+from node.model_types import Block
 
 
 def bootstrap_blockchain():
@@ -25,22 +25,22 @@ def bootstrap_blockchain():
         nonce=nonce,
     )
 
-    blocks.load()
-    blocks.set_block(block.mined_hash, block)
-    blocks.tail_block = block
-    blocks.save()
-    blocks.close()
+    blockchain.load()
+    blockchain.set_block(block.mined_hash, block)
+    blockchain.tail_block = block
+    blockchain.save()
+    blockchain.close()
 
 
 def main(args=None):
-    blocks.load()
+    blockchain.load()
     client.init_client()
     start_miner()
     try:
         start_server()
     except KeyboardInterrupt:
         pass
-    blocks.close()
+    blockchain.close()
 
 
 def debug():

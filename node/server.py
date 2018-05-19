@@ -1,7 +1,7 @@
 from apistar import App, Include
 
-from blockchain.client import config
-from blockchain import api
+from node.client import config
+from node import api
 
 routes = [
     Include('/node', name='node', routes=api.routes),

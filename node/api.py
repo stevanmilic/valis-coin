@@ -2,9 +2,9 @@ from typing import List
 
 from apistar import Route, http
 
-from blockchain import client
-from blockchain.miner import miner
-from blockchain.model_types import Transaction, Block, Node, BlockInfo
+from node import client
+from node.miner import miner
+from node.model_types import Transaction, Block, Node, BlockInfo
 
 
 def validate_transaction(transaction: Transaction) -> bool:
@@ -44,8 +44,8 @@ def add_block(block: Block) -> http.JSONResponse:
     if not verify_block(block):
         return http.JSONResponse({'status': 'Error'}, status_code=400)
 
-    client.blocks.set_block(block.mined_hash, block)
-    client.blocks.tail_block = block
+    client.blockchain.set_block(block.mined_hash, block)
+    client.blockchain.tail_block = block
     return http.JSONResponse({'status': 'Success'}, status_code=200)
 
 

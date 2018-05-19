@@ -104,4 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # blockchain files
-blocks.dat
+blockchain.dat

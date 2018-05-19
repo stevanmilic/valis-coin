@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from blockchain.miner import Miner, DIFFICULTY
-from blockchain.model_types import Transaction, Block
+from node.miner import Miner, DIFFICULTY
+from node.model_types import Transaction, Block
 
 
 @pytest.fixture

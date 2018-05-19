@@ -1,13 +1,13 @@
 from setuptools import setup
 
 setup(
-    name='blockchain',
+    name='node',
     version='0.1.0',
-    packages=['blockchain'],
+    packages=['node'],
     entry_points={
         'console_scripts': [
-            'valis-node = blockchain.__main__:main',
-            'debug-valis-node = blockchain.__main__:debug'
+            'valis-node = node.__main__:main',
+            'debug-valis-node = node.__main__:debug'
         ]
     },
     install_requires=[

@@ -3,8 +3,8 @@ from typing import List
 from hashlib import sha256
 from datetime import datetime
 
-from blockchain import client
-from blockchain.model_types import Transaction, Block
+from node import client
+from node.model_types import Transaction, Block
 
 
 DIFFICULTY = 2

@@ -1,6 +1,6 @@
 from apistar import types, validators
 
-from blockchain.blocks import get_block
+from node.blockchain import get_block
 
 
 class PickleType(types.Type):
