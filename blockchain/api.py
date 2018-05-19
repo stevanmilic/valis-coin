@@ -8,29 +8,19 @@ from blockchain.model_types import Transaction, Block, Node, BlockInfo
 
 
 def validate_transaction(transaction: Transaction) -> bool:
-    # TODO: implement a smarter way of validating transactions e.g. UTXO
-    #       since this approach won't work (the pool is cleared)
-    block = client.tail_block
+    unspent_output = client.utxo[transaction.sender]
+    return transaction.amount <= unspent_output
 
-    # this a sender transactions info
-    output_amount = input_amount = 0
 
-    while block is not None:
-        for valid_transaction in block.txns:
-            if valid_transaction.receiver == transaction.sender:
-                input_amount += valid_transaction.amount
-            elif valid_transaction.sender == transaction.sender:
-                output_amount += valid_transaction.output_amount
+def verify_block(block):
+    payload = (
+        str(client.tail_block.previous_hash) +
+        str(block.timestamp) +
+        miner.hash_transaction_pool(block.txns_pool)
+    )
 
-        block = block.previous_block
-
-    # how much amount(money) sender has
-    net_amount = input_amount - output_amount
-
-    if transaction.amount <= net_amount:
-        return True
-
-    return False
+    verify_hash = miner.hashcash(payload, block.nonce)
+    return verify_hash == block.mined_hash
 
 
 def push_transaction(transaction: Transaction) -> http.JSONResponse:
@@ -45,13 +35,18 @@ def push_transaction(transaction: Transaction) -> http.JSONResponse:
     return http.JSONResponse({'status': 'Success'}, status_code=200)
 
 
-def notify_mined_block(block: Block) -> http.JSONResponse:
-    raise NotImplementedError()
-
-
 def get_node_network(node: Node) -> List[Node]:
     client.node_network.add(node.address)
     return list(client.node_network)
+
+
+def add_block(block: Block) -> http.JSONResponse:
+    if not verify_block(block):
+        return http.JSONResponse({'status': 'Error'}, status_code=400)
+
+    client.blocks.set_block(block.mined_hash, block)
+    client.blocks.tail_block = block
+    return http.JSONResponse({'status': 'Success'}, status_code=200)
 
 
 def get_block(block_info: BlockInfo) -> Block:
@@ -69,7 +64,7 @@ def get_block(block_info: BlockInfo) -> Block:
 
 routes = [
     Route('/transactions', method='POST', handler=push_transaction),
-    Route('/mined_blocks', method='POST', handler=notify_mined_block),
     Route('/node_network', method='GET', handler=get_node_network),
     Route('/blockchain', method='GET', handler=get_block),
+    Route('/blockchain', method='POST', handler=add_block),
 ]

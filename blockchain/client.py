@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+from collections import defaultdict
 
 import requests
 
@@ -8,8 +9,8 @@ from blockchain.model_types import Block
 config = ConfigParser()
 config.read('config.ini')
 
-tail_block = None
 txns_pool = []
+utxo = defaultdict(int)
 node_network = set()
 
 TXNS_POOL_SIZE = 5
@@ -72,6 +73,15 @@ def get_blockchain():
         index = (index - 1) % node_network_length
 
 
+def init_utxo():
+    block = blocks.tail_block
+    while block.previous_hash is not None:
+        for txn in block.txns_pool:
+            utxo[txn.receiver] += txn.amount
+            if txn.sender:
+                utxo[txn.sender] -= txn.amount
+
+
 def init_client():
     """Initializes the client interface towards other nodes.
 
@@ -82,3 +92,4 @@ def init_client():
 
     if node_network:
         get_blockchain()
+        init_utxo()

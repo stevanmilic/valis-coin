@@ -30,23 +30,23 @@ class Miner(threading.Thread):
         )
 
     @staticmethod
-    def _hashcash(payload, nonce) -> str:
+    def hashcash(payload, nonce) -> str:
         data = (payload + str(nonce)).encode('utf-8')
         return sha256(sha256(data).digest()).hexdigest()
 
     @staticmethod
-    def _hash_transaction_pool(txns_pool) -> str:
+    def hash_transaction_pool(txns_pool) -> str:
         txns_pool_bytes = str(txns_pool).encode('utf-8')
         return sha256(txns_pool_bytes).hexdigest()
 
     @classmethod
     def mine(cls, payload, txns_pool, reward_wallet):
         nonce = 0
-        mined_hash = cls._hashcash(payload, nonce)
+        mined_hash = cls.hashcash(payload, nonce)
 
         while not mined_hash.startswith('0' * DIFFICULTY):
             nonce += 1
-            mined_hash = cls._hashcash(payload, nonce)
+            mined_hash = cls.hashcash(payload, nonce)
 
         txns_pool.append(Transaction(
             receiver=reward_wallet,
@@ -63,7 +63,7 @@ class Miner(threading.Thread):
         payload = (
             str(tail_block.previous_hash) +
             str(timestamp) +
-            cls._hash_transaction_pool(txns_pool)
+            cls.hash_transaction_pool(txns_pool)
         )
 
         txns_pool.append(cls.reward(reward_wallet))
