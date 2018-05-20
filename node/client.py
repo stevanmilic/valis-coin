@@ -1,5 +1,7 @@
+import json
 from configparser import ConfigParser
 from collections import defaultdict
+from threading import Thread
 
 import requests
 
@@ -30,8 +32,10 @@ def get_node_network():
         if node_address == current_node_address:
             continue
 
+        node_network.add(node_address)
+
         request = {
-            'address': node_address,
+            'address': current_node_address,
         }
         response = requests.get(
             f'http://{node_address}/node/node_network',
@@ -75,17 +79,22 @@ def get_blockchain():
             node_network_list[index],
             block.height - 1,
         )
+        # TODO: verify block before accepting it
         blockchain.set_block(block.mined_hash, block)
         index = (index - 1) % node_network_length
+
+
+def update_utxo(txns):
+    for txn in txns:
+        utxo[txn.receiver] += txn.amount
+        if txn.sender:
+            utxo[txn.sender] -= txn.amount
 
 
 def init_utxo():
     block = blockchain.tail_block
     while block is not None:
-        for txn in block.txns:
-            utxo[txn.receiver] += txn.amount
-            if txn.sender:
-                utxo[txn.sender] -= txn.amount
+        update_utxo(block.txns)
         block = block.previous_block
 
 
@@ -103,3 +112,32 @@ def init_client():
 
     if blockchain.tail_block:
         init_utxo()
+
+
+def notify_nodes(block):
+    for node in node_network:
+        # TODO: refactor this serialization please :/
+        data = dict(block._dict)
+        data['timestamp'] = str(data['timestamp'])
+
+        txns = []
+        for txn in block.txns:
+            txn_data = dict(txn._dict)
+            txn_data['timestamp'] = str(txn_data['timestamp'])
+            txns.append(txn_data)
+        data['txns'] = txns
+
+        requests.post(
+            f'http://{node}/node/blockchain',
+            data=json.dumps(data),
+        )
+
+
+def announce_mined_block(block):
+    """
+    Notify other nodes about the mined block, this will cause a broadcast storm
+    but oh well ¯\_(ツ)_/¯
+    Function is executed in separete thread to unblock the main thread of execution.
+    """
+    announcement_thread = Thread(target=notify_nodes, args=(block,))
+    announcement_thread.start()

@@ -11,11 +11,11 @@ DIFFICULTY = 2
 
 
 class Miner(threading.Thread):
+    mining = threading.Event()
 
     def __init__(self):
         super().__init__()
         self.mine_info = None
-        self.mining = threading.Event()
         # TODO: use this lock ... concurrently
         self.lock = threading.Lock()
 
@@ -26,6 +26,7 @@ class Miner(threading.Thread):
     @classmethod
     def reward(cls, wallet):
         return Transaction(
+            timestamp=datetime.now(),
             receiver=wallet,
             sender=None,
             amount=cls.calculate_reward(),
@@ -42,37 +43,32 @@ class Miner(threading.Thread):
         return sha256(txns_pool_bytes).hexdigest()
 
     @classmethod
-    def mine(cls, payload, txns_pool, reward_wallet):
-        nonce = 0
-        mined_hash = cls.hashcash(payload, nonce)
+    def mine(cls, previous_hash, txns_pool, timestamp, reward_wallet):
+        txns_pool.append(cls.reward(reward_wallet))
 
+        payload = (
+            str(previous_hash) +
+            str(timestamp) +
+            cls.hash_transaction_pool(txns_pool)
+        )
+        nonce = 0
+
+        mined_hash = cls.hashcash(payload, nonce)
         while not mined_hash.startswith('0' * DIFFICULTY):
+            if not cls.mining.is_set():
+                return None
             nonce += 1
             mined_hash = cls.hashcash(payload, nonce)
-
-        txns_pool.append(Transaction(
-            receiver=reward_wallet,
-            sender=None,
-            amount=cls.calculate_reward()
-        ))
 
         return nonce, mined_hash
 
     @classmethod
     def mine_for_block(cls, txns_pool, tail_block, reward_wallet):
         timestamp = datetime.now()
-
-        payload = (
-            str(tail_block.previous_hash) +
-            str(timestamp) +
-            cls.hash_transaction_pool(txns_pool)
-        )
-
-        txns_pool.append(cls.reward(reward_wallet))
-
         nonce, mined_hash = cls.mine(
-            payload,
+            tail_block.previous_hash,
             txns_pool,
+            timestamp,
             reward_wallet,
         )
 
@@ -88,7 +84,9 @@ class Miner(threading.Thread):
     @classmethod
     def publish_the_block(cls, mined_block):
         client.blockchain.tail_block = mined_block
-        # TODO: publish to all nodes
+        client.update_utxo(mined_block.txns)
+        # NOTE: this is done in separete thread, hooray
+        client.announce_mined_block(mined_block)
 
     def run(self):
         while self.mining.wait():
@@ -97,10 +95,12 @@ class Miner(threading.Thread):
                 self.mine_info['tail_block'],
                 client.config['WALLET']['Address'],
             )
-            self.mining.clear()
 
-            # use seperate thread for this please
-            self.publish_the_block(mined_block)
+            # mining could be interrupted by new block which arrived
+            # from some other node. if there is no interruption, publish
+            if self.mining.is_set():
+                self.mining.clear()
+                self.publish_the_block(mined_block)
 
     def process_txns_pool(self,
                           txns_pool: List[Transaction],
@@ -115,6 +115,9 @@ class Miner(threading.Thread):
             'tail_block': tail_block,
         }
         self.mining.set()
+
+    def stop_mining(self):
+        self.mining.clear()
 
 
 miner = Miner()

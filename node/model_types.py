@@ -13,6 +13,7 @@ class PickleType(types.Type):
 
 
 class Transaction(PickleType):
+    timestamp = validators.DateTime()
     sender = validators.String(max_length=100, allow_null=True)
     receiver = validators.String(max_length=100)
     amount = validators.Integer()

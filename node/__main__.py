@@ -9,16 +9,19 @@ from node.model_types import Block
 
 def bootstrap_blockchain():
     txns_to_process = []
+    timestamp = datetime.now()
 
+    Miner.mining.set()
     nonce, mined_hash = Miner.mine(
-        'start_payload',
+        '',
         txns_to_process,
+        timestamp,
         client.config['WALLET']['Address'],
     )
 
     block = Block(
         height=0,
-        timestamp=datetime.now(),
+        timestamp=timestamp,
         txns=txns_to_process,
         mined_hash=mined_hash,
         previous_hash=None,
@@ -26,8 +29,10 @@ def bootstrap_blockchain():
     )
 
     blockchain.load()
+
     blockchain.set_block(block.mined_hash, block)
     blockchain.tail_block = block
+
     blockchain.save()
     blockchain.close()
 
